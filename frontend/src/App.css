@@ -1,0 +1,20 @@
+.app { max-width: 960px; margin: 0 auto; padding: 24px; font-family: system-ui, sans-serif; }
+header h1 { margin: 0; }
+.muted { color: #666; font-size: 0.9em; }
+.mono { font-family: ui-monospace, monospace; font-size: 0.8em; word-break: break-all; }
+.card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin: 12px 0; background: #fff; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.space-between { justify-content: space-between; }
+.col { display: flex; flex-direction: column; gap: 8px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; margin: 8px 0; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+.tabs button.active { font-weight: bold; text-decoration: underline; }
+.rowbox { border-top: 1px solid #eee; padding: 8px 0; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.truncate { max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 6px; border-bottom: 1px solid #eee; font-size: 0.9em; }
+input, textarea, select { padding: 6px; border: 1px solid #ccc; border-radius: 4px; min-width: 200px; }
+button { padding: 6px 12px; cursor: pointer; }
+.error { color: #a00; margin: 8px 0; }
+.warn { background: #fff8e1; border: 1px solid #f0d060; padding: 8px; margin: 8px 0; border-radius: 4px; }
+footer { margin-top: 24px; }
