@@ -15,7 +15,8 @@ const config: HardhatUserConfig = {
     localhost: {
       url: "http://127.0.0.1:8545",
     },
-    // Enabled only when env vars are present. Do NOT deploy yet (Stage 1 = local only).
+    // Sepolia is enabled only when both env vars are set in .env (never committed).
+    // Localhost development is unaffected.
     ...(SEPOLIA_RPC_URL && PRIVATE_KEY
       ? {
           sepolia: {
