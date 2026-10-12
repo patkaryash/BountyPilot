@@ -106,7 +106,15 @@ export default function App() {
           }}
         />
       )}
-      {tab === "create" && <CreateBounty signer={wallet.signer} onCreated={() => void refresh()} />}
+      {tab === "create" && (
+        <CreateBounty
+          signer={wallet.signer}
+          onCreated={(id) => {
+            if (id !== null) setSelectedBounty(id);
+            void refresh();
+          }}
+        />
+      )}
       {tab === "details" && (
         <BountyDetails
           bounty={selected}
