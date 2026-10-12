@@ -48,7 +48,7 @@ export function Dashboard(props: {
   );
 }
 
-export function CreateBounty(props: { signer: ethers.Signer | null; onCreated: () => void }) {
+export function CreateBounty(props: { signer: ethers.Signer | null; onCreated: (newBountyId: number | null) => void }) {
   const [metadata, setMetadata] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -68,10 +68,24 @@ export function CreateBounty(props: { signer: ethers.Signer | null; onCreated: (
     try {
       const c = getContract(props.signer);
       const tx = await c.createBounty(metadata.trim());
-      await tx.wait();
+      const receipt = await tx.wait();
+      // Decode the new bounty id from the BountyCreated log so the UI can
+      // select it. Falls back to null (list still refreshes) if undecodable.
+      let newId: number | null = null;
+      for (const log of receipt?.logs ?? []) {
+        try {
+          const parsed = c.interface.parseLog(log);
+          if (parsed?.name === "BountyCreated") {
+            newId = Number(parsed.args.bountyId);
+            break;
+          }
+        } catch {
+          // ignore logs from other contracts
+        }
+      }
       setMetadata("");
-      setMsg("Bounty created.");
-      props.onCreated();
+      setMsg(newId !== null ? `Bounty #${newId} created.` : "Bounty created.");
+      props.onCreated(newId);
     } catch (err) {
       setMsg(err instanceof Error ? err.message : "Create failed.");
     } finally {
