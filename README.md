@@ -111,3 +111,52 @@ npm run build           # production build (tsc + vite)
 
 End-to-end browser click-through on localhost, then Sepolia deployment
 planning (`.env` with `SEPOLIA_RPC_URL`/`PRIVATE_KEY`, never committed).
+
+## Sepolia deployment (planned — NOT deployed yet)
+
+Target: Ethereum Sepolia testnet, chain ID `11155111`. Test ETH only.
+The contract is still NOT audited and NOT production-ready.
+
+### What you need (you provide these at deploy time — never commit them)
+
+- `SEPOLIA_RPC_URL`: HTTPS endpoint for Sepolia from a provider such as
+  Alchemy or Infura (a project API key from their dashboard).
+- Sepolia test ETH on a **dedicated test wallet** (never a wallet holding
+  real assets). Faucets: Google Cloud's Sepolia faucet or Alchemy's Sepolia
+  faucet (both need an account; amounts are small test ETH).
+- `PRIVATE_KEY`: `0x`-prefixed key of that dedicated test wallet, used only
+  by Hardhat from root `.env`. Never put it in any `frontend/.env` file —
+  `VITE_*` values ship in browser JS.
+
+### Environment setup (placeholders only in repo)
+
+```powershell
+cd G:\BountyPilot
+copy .env.example .env
+# edit .env: paste SEPOLIA_RPC_URL and PRIVATE_KEY (test wallet only)
+```
+
+### Deployment checklist
+
+1. `npx hardhat test` green (12 passing) and `npm run build` green in `frontend/`.
+2. Root `.env` filled locally; `git status` shows no `.env` (it is ignored).
+3. Deployer wallet holds a little Sepolia test ETH for gas.
+4. Run `npm run deploy:sepolia`, save the printed address.
+5. Confirm `deployments/sepolia.json` shows `chainId: 11155111`.
+6. Verify on Sepolia Etherscan (contract page shows the `BountyPilot` tx).
+7. Point the frontend at Sepolia (localhost defaults untouched):
+   `frontend/.env` → `VITE_CONTRACT_ADDRESS=<sepolia address>`,
+   `VITE_EXPECTED_CHAIN_ID=11155111`; restart `npm run dev`.
+8. In MetaMask, switch to Sepolia and re-run the E2E flow with test ETH.
+
+### Exact commands (run only when you approve the deploy)
+
+```powershell
+cd G:\BountyPilot
+npx hardhat test
+npm run deploy:sepolia
+Get-Content deployments\sepolia.json
+
+cd frontend
+npm run build
+```
