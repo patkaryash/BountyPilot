@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ethers } from "ethers";
 import { EXPECTED_CHAIN_ID, LOCAL_RPC_URL } from "../config/contract";
-import { shortAddr } from "../lib/bounty";
+import { chainLabel } from "../lib/bounty";
 
 declare global {
   interface Window {
@@ -110,33 +110,24 @@ export function WalletPanel(props: {
   onDisconnect: () => void;
   onSwitch: () => void;
 }) {
+  // Wallet status + connect button live in the top nav; this renders
+  // only connection errors and the network-mismatch alert.
+  void props.connecting;
+  void props.onConnect;
+  void props.onDisconnect;
   return (
-    <div className="card">
-      <div className="row space-between">
-        <div>
-          <strong>Wallet</strong>
-          <div className="muted">
-            {props.address
-              ? `${shortAddr(props.address)} · chain ${props.chainId}`
-              : "Not connected"}
-          </div>
-        </div>
-        {props.address ? (
-          <button onClick={props.onDisconnect}>Disconnect</button>
-        ) : (
-          <button onClick={props.onConnect} disabled={props.connecting}>
-            {props.connecting ? "Connecting…" : "Connect MetaMask"}
-          </button>
-        )}
-      </div>
-      {props.error && <div className="error">{props.error}</div>}
+    <>
+      {props.error && <div className="alert alert-error">{props.error}</div>}
       {props.mismatch && props.address && (
-        <div className="warn">
-          Network mismatch: connected to chain {props.chainId}, expected{" "}
-          {EXPECTED_CHAIN_ID} (localhost Hardhat).{" "}
-          <button onClick={props.onSwitch}>Switch network</button>
+        <div className="alert alert-warn">
+          Wrong network: connected to {chainLabel(props.chainId)} (chain{" "}
+          {props.chainId}), expected {chainLabel(EXPECTED_CHAIN_ID)} (chain{" "}
+          {EXPECTED_CHAIN_ID}).{" "}
+          <button className="btn-small" onClick={props.onSwitch}>
+            Switch network
+          </button>
         </div>
       )}
-    </div>
+    </>
   );
 }

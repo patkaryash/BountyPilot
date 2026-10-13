@@ -1,2 +1,31 @@
-:root { color-scheme: light; }
-body { margin: 0; background: #f6f6f6; color: #222; }
+:root {
+  color-scheme: dark;
+  --bg: #0c0d12;
+  --bg-soft: #12141b;
+  --card: #15171f;
+  --card-2: #1a1d27;
+  --line: #262932;
+  --text: #f4f4f5;
+  --muted: #9c9ea8;
+  --accent: #ff4d6d;
+  --accent-dim: rgba(255, 77, 109, 0.12);
+  --good: #34d399;
+  --bad: #fb7185;
+  --warn: #fbbf24;
+  --radius: 8px;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
