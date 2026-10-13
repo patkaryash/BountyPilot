@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { CONTRACT_ADDRESS, EXPECTED_CHAIN_ID } from "./config/contract";
-import { getContract, loadBounties, loadReports, type Bounty, type Report } from "./lib/bounty";
+import { chainLabel, formatError, getContract, loadBounties, loadReports, shortAddr, type Bounty, type Report } from "./lib/bounty";
 import { WalletPanel, useWallet } from "./components/WalletButton";
-import { BountyDetails, CreateBounty, Dashboard } from "./components/Bounties";
+import { BountyDetails, CreateBounty, Dashboard, OwnerBounties } from "./components/Bounties";
 import { OwnerReview, ResearcherReports, SubmitReport } from "./components/Reports";
 import { TxHistory } from "./components/TxHistory";
 import "./App.css";
 
-type Tab = "market" | "create" | "details" | "submit" | "mine" | "review" | "history";
+type Tab = "market" | "owned" | "create" | "details" | "submit" | "mine" | "review" | "history";
 
 export default function App() {
   const { wallet, error, connecting, mismatch, connect, disconnect, switchToLocal } = useWallet();
@@ -33,7 +33,7 @@ export default function App() {
       setReports(r);
       setStatus(null);
     } catch (e) {
-      setStatus(e instanceof Error ? e.message : "Failed to load on-chain data.");
+      setStatus(formatError(e));
     } finally {
       setLoading(false);
     }
@@ -47,15 +47,54 @@ export default function App() {
 
   return (
     <div className="app">
-      <header>
-        <h1>BountyPilot</h1>
-        <p className="muted">
-          Distributed bug bounty MVP · local Hardhat only · NOT audited, NOT production-ready
-        </p>
-        <p className="muted mono">
-          Contract {CONTRACT_ADDRESS} · expected chain {EXPECTED_CHAIN_ID}
-        </p>
-      </header>
+      <nav className="topnav">
+        <div className="brand">
+          <div className="brand-mark" aria-hidden="true">B</div>
+          <span className="brand-name">BountyPilot</span>
+        </div>
+        <div className="nav-links">
+          {(
+            [
+              ["market", "Bounties"],
+              ["owned", "My Bounties"],
+              ["create", "Create"],
+              ["details", "Bounty"],
+              ["submit", "Submit"],
+              ["mine", "My Reports"],
+              ["review", "Review"],
+              ["history", "History"],
+            ] as [Tab, string][]
+          ).map(([id, label]) => (
+            <button key={id} className={tab === id ? "active" : ""} onClick={() => setTab(id)}>
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className="nav-wallet">
+          <span
+            className={`dot${wallet.address ? (mismatch ? " bad" : " on") : ""}`}
+            aria-hidden="true"
+          />
+          <span className="muted">
+            {wallet.address
+              ? `${shortAddr(wallet.address)} · ${chainLabel(wallet.chainId)}`
+              : "Not connected"}
+          </span>
+          {wallet.address ? (
+            <button className="btn-small" onClick={disconnect}>
+              Disconnect
+            </button>
+          ) : (
+            <button className="btn-small btn-primary" onClick={connect} disabled={connecting}>
+              {connecting ? "Connecting…" : "Connect"}
+            </button>
+          )}
+        </div>
+      </nav>
+      <p className="muted mono contract-line">
+        Contract {CONTRACT_ADDRESS} · {chainLabel(EXPECTED_CHAIN_ID)} (chain{" "}
+        {EXPECTED_CHAIN_ID})
+      </p>
 
       <WalletPanel
         address={wallet.address}
@@ -68,38 +107,33 @@ export default function App() {
         onSwitch={switchToLocal}
       />
 
-      <nav className="tabs">
-        {(
-          [
-            ["market", "Dashboard"],
-            ["create", "Create"],
-            ["details", "Bounty"],
-            ["submit", "Submit"],
-            ["mine", "My reports"],
-            ["review", "Review"],
-            ["history", "History"],
-          ] as [Tab, string][]
-        ).map(([id, label]) => (
-          <button key={id} className={tab === id ? "active" : ""} onClick={() => setTab(id)}>
-            {label}
-          </button>
-        ))}
-        <button onClick={() => void refresh()} disabled={!wallet.provider}>
-          Refresh
-        </button>
-      </nav>
-
       {!wallet.address && (
-        <div className="card">
-          <p>Connect MetaMask to interact. Use a local Hardhat test account — never real funds.</p>
+        <div className="card empty">
+          <div className="big">Connect your wallet to begin</div>
+          <p>Use a Sepolia test account with test ETH — never real funds.</p>
+          <button className="btn-primary" onClick={connect} disabled={connecting}>
+            {connecting ? "Connecting…" : "Connect MetaMask"}
+          </button>
         </div>
       )}
-      {status && <div className="error">{status}</div>}
+      {status && <div className="alert alert-error">{status}</div>}
 
       {tab === "market" && (
         <Dashboard
           bounties={bounties}
           loading={loading}
+          onRefresh={() => void refresh()}
+          onSelect={(id) => {
+            setSelectedBounty(id);
+            setTab("details");
+          }}
+        />
+      )}
+      {tab === "owned" && (
+        <OwnerBounties
+          bounties={bounties}
+          loading={loading}
+          account={wallet.address}
           onSelect={(id) => {
             setSelectedBounty(id);
             setTab("details");
